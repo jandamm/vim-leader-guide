@@ -218,8 +218,7 @@ function! s:show_displayname(inp) " {{{
     end
 endfunction " }}}
 " displaynames {{{1 "
-let s:displaynames = {'<C-I>': '<Tab>',
-                    \ '<C-H>': '<BS>'}
+let s:displaynames = {'<C-I>': 'TAB', '<BS>': 'BS', '<C-H>': 'BS', ' ': 'SPC'}
 " 1}}} "
 
 
