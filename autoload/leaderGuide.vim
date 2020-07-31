@@ -181,7 +181,12 @@ function! s:escape_mappings(mapping) " {{{
     let rstring = substitute(a:mapping.rhs, '\', '\\\\', 'g')
     let rstring = substitute(rstring, '<\([^<>]*\)>', '\\<\1>', 'g')
     let rstring = substitute(rstring, '"', '\\"', 'g')
-    let rstring = 'call feedkeys("'.rstring.'", "'.feedkeyargs.'")'
+    let cmd_reg = '\v^%(:|\V\\<CMD>\v)(.*)\V\\<CR>\v$'
+    if rstring =~? cmd_reg
+        let rstring = substitute(rstring, cmd_reg, '\1', '')
+    else
+        let rstring = 'call feedkeys("'.rstring.'", "'.feedkeyargs.'")'
+    endif
     return rstring
 endfunction " }}}
 function! s:string_to_keys(input) " {{{
@@ -374,7 +379,7 @@ function! s:handle_input(input) " {{{
         endif
         redraw
         try
-            unsilent execute a:input[0]
+            silent! execute a:input[0]
         catch
             unsilent echom v:exception
         endtry
