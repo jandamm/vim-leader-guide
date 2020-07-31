@@ -238,6 +238,7 @@ function! s:calc_layout() " {{{
         let ret.win_dim = ret.n_cols * ret.col_width
     else
         let ret.n_cols = winwidth(0) / maxlength
+        if ret.n_cols == 0 | let ret.n_cols = 1 | endif
         let ret.col_width = winwidth(0) / ret.n_cols
         let ret.n_rows = ret.n_items / ret.n_cols + (fmod(ret.n_items,ret.n_cols) > 0 ? 1 : 0)
         let ret.win_dim = ret.n_rows
