@@ -204,6 +204,7 @@ function! s:string_to_keys(input) " {{{
         return retlist
     else
         return split(a:input, '\zs')
+    endif
 endfunction " }}}
 function! s:escape_keys(inp) " {{{
     let ret = substitute(a:inp, "<", "<lt>", "")
@@ -228,7 +229,7 @@ function! s:calc_layout() " {{{
     let ret.n_items = len(smap)
     let length = values(map(smap, 
                 \ 'strdisplaywidth("[".v:key."]".'.
-                \ '(type(v:val) == type({}) ? v:val["name"] : v:val[1]))'))
+                \ '(type(v:val) == type({}) ? "+".v:val["name"] : v:val[1]))'))
     let maxlength = max(length) + g:leaderGuide_hspace
     if g:leaderGuide_vertical
         let ret.n_rows = winheight(0) - 2
@@ -257,7 +258,7 @@ function! s:create_string(layout) " {{{
     let smap = sort(filter(keys(s:lmap), 'v:val !=# "name"'),'1')
     for k in smap
         let desc = type(s:lmap[k]) == type({}) ? s:lmap[k].name : s:lmap[k][1]
-        let displaystring = "[".s:show_displayname(k)."] ".desc
+        let displaystring = "[".s:show_displayname(k)."] ".(type(s:lmap[k]) == type({}) ? "+" : "").desc
         let crow = get(rows, row, [])
         if empty(crow)
             call add(rows, crow)
