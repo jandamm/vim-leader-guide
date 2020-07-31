@@ -395,7 +395,7 @@ function! s:wait_for_input() " {{{
         call s:submode_mappings()
     else
         call add(s:last_inp, curr_inp)
-        let fsel = get(s:lmap, curr_inp)
+        let fsel = get(s:lmap, curr_inp[-1:])
         call s:handle_input(fsel)
     endif
 endfunction " }}}
