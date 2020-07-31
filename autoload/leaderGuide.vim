@@ -259,11 +259,14 @@ function! s:create_string(layout) " {{{
     let overh = l.n_cols - overcap
     let n_rows =  l.n_rows - 1
 
+    let bs = 0
+
     let rows = []
     let row = 0
     let col = 0
     let smap = sort(filter(keys(s:lmap), 'v:val !=# "name"'),'1')
     for k in smap
+        if k ==? '<BS>' | let bs = 1 | endif
         silent execute "cnoremap <nowait> <buffer> ".substitute(k, "|", "<Bar>", ""). " " . s:escape_keys(k) ."<CR>"
         let desc = type(s:lmap[k]) == type({}) ? s:lmap[k].name : s:lmap[k][1]
         if desc ==? 'leader_ignore' | continue | endif
@@ -308,6 +311,9 @@ function! s:create_string(layout) " {{{
     call insert(r, '')
     let output = join(r, "\n ")
     cnoremap <nowait> <buffer> <Space> <Space><CR>
+    if !bs
+        cnoremap <nowait> <buffer> <BS> <LGCMD>back<CR>
+    endif
     cnoremap <nowait> <buffer> <silent> <c-c> <LGCMD>submode<CR>
     return output
 endfunction " }}}
@@ -387,11 +393,13 @@ function! s:handle_input(input) " {{{
 endfunction " }}}
 function! s:wait_for_input() " {{{
     redraw
-    "let inp = input("")
-    let curr_inp = input("")
+    let curr_inp = input('')
     if curr_inp ==? ''
         call s:winclose()
-    elseif match(curr_inp, "^<LGCMD>submode") == 0
+    elseif match(curr_inp, '^<LGCMD>back') == 0
+        " TODO: Get a layer back
+        call s:winclose()
+    elseif match(curr_inp, '^<LGCMD>submode') == 0
         call s:submode_mappings()
     else
         call add(s:last_inp, curr_inp)
