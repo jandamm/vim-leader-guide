@@ -66,6 +66,8 @@ function! s:merge(dict_t, dict_o) " {{{
                     call s:merge(target[k."m"], other[k."m"])
                 endif
             endif
+        elseif type(target[k]) == type('') && has_key(other, k) && k !=? 'name'
+            let target[k] = [other[k][0], target[k]]
         endif
     endfor
     call extend(target, other, "keep")
