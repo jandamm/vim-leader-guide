@@ -152,7 +152,7 @@ function! s:add_map_to_dict(map, level, dict) abort " {{{
 	endif
 endfunction " }}}
 function! s:format_displaystring(map) abort " {{{
-	let g:leaderGuide#displayname = a:map
+	let g:leaderGuide#displayname = s:cmd_rename(a:map)[0]
 	for Fun in g:leaderGuide_displayfunc
 		call Fun()
 	endfor
@@ -175,16 +175,21 @@ function! s:flattenmap(dict, str) abort " {{{
 	return ret
 endfunction " }}}
 
-
+function! s:cmd_rename(string) abort
+	let cmd_reg = '\v^%(:|\V\\<CMD>\v)(.*)\V\\<CR>\v$'
+	if a:string =~? cmd_reg
+		return [substitute(a:string, cmd_reg, '\1', ''), 1]
+	else
+		return [a:string, 0]
+	endif
+endfunction
 function! s:escape_mappings(mapping) abort " {{{
 	let feedkeyargs = a:mapping.noremap ? 'nt' : 'mt'
 	let rstring = substitute(a:mapping.rhs, '\', '\\\\', 'g')
 	let rstring = substitute(rstring, '<\([^<>]*\)>', '\\<\1>', 'g')
 	let rstring = substitute(rstring, '"', '\\"', 'g')
-	let cmd_reg = '\v^%(:|\V\\<CMD>\v)(.*)\V\\<CR>\v$'
-	if rstring =~? cmd_reg
-		let rstring = substitute(rstring, cmd_reg, '\1', '')
-	else
+	let [rstring, suc] = s:cmd_rename(rstring)
+	if !suc
 		let rstring = 'call feedkeys("'.rstring.'", "'.feedkeyargs.'")'
 	endif
 	return rstring
