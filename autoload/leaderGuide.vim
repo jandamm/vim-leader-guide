@@ -311,11 +311,8 @@ function! s:create_string(layout) abort " {{{
 	let output = join(r, "\n ")
 	cnoremap <nowait> <buffer> <Space> <C-u><Space><CR>
 	if !bs
-		if s:current_level == 1
-			cnoremap <nowait> <buffer> <BS> <C-u><ESC>
-		else
-			cnoremap <nowait> <buffer> <BS> <C-u><LGCMD>back<CR>
-		endif
+		let map = s:current_level == 1 ? '\<ESC>' : '<LGCMD>back\<CR>'
+		silent execute 'cnoremap <nowait> <expr> <buffer> <BS> empty(getcmdline()) ? "'.map.'" : "\<BS>"'
 	endif
 	cnoremap <nowait> <buffer> <silent> <c-c> <LGCMD>submode<CR>
 	return output
