@@ -403,14 +403,9 @@ function! s:wait_for_input() abort " {{{
 		call s:winclose()
 		let s:current_level -= 1
 		call remove(s:last_inp, -1)
-		if !empty(s:last_inp)
-			let lmap = copy(s:cached_dicts)
-			for key in s:last_inp
-				let lmap = lmap[key]
-			endfor
-			let s:lmap = lmap
-			call s:start_buffer()
-		endif
+		if empty(s:last_inp) | return | endif
+		let s:lmap = s:get_cur_map()
+		call s:start_buffer()
 	elseif match(curr_inp, '^<LGCMD>submode') == 0
 		call s:submode_mappings()
 	else
@@ -419,6 +414,13 @@ function! s:wait_for_input() abort " {{{
 		call s:handle_input(fsel)
 	endif
 endfunction " }}}
+function! s:get_cur_map() abort
+	let lmap = copy(s:cached_dicts)
+	for key in s:last_inp
+		let lmap = lmap[key]
+	endfor
+	return lmap
+endfunction
 function! s:winopen() abort " {{{
 	if !exists('s:bufnr')
 		let s:bufnr = -1
@@ -449,17 +451,18 @@ function! s:winopen() abort " {{{
 	setlocal nobuflisted buftype=nofile bufhidden=unload noswapfile
 	setlocal nocursorline nocursorcolumn colorcolumn=
 	setlocal winfixwidth winfixheight
-	call setwinvar(winnr(), '&statusline', '%{s:statusline_keys()}%=%{s:statusline_name()}')
+	call setwinvar(winnr(), '&statusline', '%{s:statusline_keys()}%=%{s:statusline_name()}%<')
 endfunction " }}}
 function! s:statusline_keys() abort
 	let ret = ''
 	for key in s:last_inp
 		let ret .= s:show_displayname(key) .' '
 	endfor
-	return (empty(ret) ? 'Leader Guide' : ret)
+	return empty(ret) ? 'Leader Guide' : ret
 endfunction
 function! s:statusline_name() abort
-	return ''
+	let name = get(s:get_cur_map(), 'name', '')
+	return empty(name) ? '' : '+'.name
 endfunction
 function! s:winclose() abort " {{{
 	noautocmd execute s:gwin.'wincmd w'
