@@ -454,12 +454,9 @@ endfunction " }}}
 function! s:statusline_keys() abort
 	let ret = ''
 	for key in s:last_inp
-		let ret .= s:key_for_status(key) .' '
+		let ret .= s:show_displayname(key) .' '
 	endfor
 	return (empty(ret) ? 'Leader Guide' : ret)
-endfunction
-function! s:key_for_status(key) abort
-	return substitute(a:key, ' ', 'SPC', '')
 endfunction
 function! s:statusline_name() abort
 	return ''
