@@ -266,7 +266,7 @@ function! s:create_string(layout) abort " {{{
 	let smap = sort(filter(keys(s:lmap), 'v:val !=# "name"'),'1')
 	for k in smap
 		if k ==? '<BS>' | let bs = 1 | endif
-		silent execute 'cnoremap <nowait> <buffer> '.substitute(k, '|', '<Bar>', ''). ' ' . s:escape_keys(k) .'<CR>'
+		silent execute 'cnoremap <nowait> <buffer> '.substitute(k, '|', '<Bar>', ''). ' <C-u>' . s:escape_keys(k) .'<CR>'
 		let desc = type(s:lmap[k]) == type({}) ? s:lmap[k].name : s:lmap[k][1]
 		if desc ==? 'leader_ignore' | continue | endif
 		let displaystring = '['.s:show_displayname(k).'] '.(type(s:lmap[k]) == type({}) ? '+' : '').desc
@@ -309,12 +309,12 @@ function! s:create_string(layout) abort " {{{
 	endfor
 	call insert(r, '')
 	let output = join(r, "\n ")
-	cnoremap <nowait> <buffer> <Space> <Space><CR>
+	cnoremap <nowait> <buffer> <Space> <C-u><Space><CR>
 	if !bs
 		if s:current_level == 1
-			cnoremap <nowait> <buffer> <BS> <ESC>
+			cnoremap <nowait> <buffer> <BS> <C-u><ESC>
 		else
-			cnoremap <nowait> <buffer> <BS> <LGCMD>back<CR>
+			cnoremap <nowait> <buffer> <BS> <C-u><LGCMD>back<CR>
 		endif
 	endif
 	cnoremap <nowait> <buffer> <silent> <c-c> <LGCMD>submode<CR>
