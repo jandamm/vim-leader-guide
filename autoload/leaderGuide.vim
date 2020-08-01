@@ -1,21 +1,21 @@
-let s:save_cpo = &cpo
-set cpo&vim
+let s:save_cpo = &cpoptions
+set cpoptions&vim
 
-function! leaderGuide#add_trigger(name, fun) " {{{
+function! leaderGuide#add_trigger(name, fun) abort " {{{
     if !exists('s:triggers')
         let s:triggers = {}
     endif
 
-    if type(a:fun) ==? type(function("tr"))
+    if type(a:fun) ==? type(function('tr'))
         let s:triggers[a:name] = a:fun
     elseif has_key(s:triggers, a:name)
         unlet! s:triggers[a:name]
     endif
 endfunction " }}}
-function! leaderGuide#has_configuration() "{{{
+function! leaderGuide#has_configuration() abort " {{{
     return exists('s:desc_lookup')
 endfunction "}}}
-function! leaderGuide#register_prefix_descriptions(key, dictname) " {{{
+function! leaderGuide#register_prefix_descriptions(key, dictname) abort " {{{
     let key = a:key ==? '<Space>' ? ' ' : a:key
     if !exists('s:desc_lookup')
         call s:create_cache()
@@ -28,11 +28,11 @@ function! leaderGuide#register_prefix_descriptions(key, dictname) " {{{
         let s:desc_lookup[key] = a:dictname
     endif
 endfunction "}}}
-function! s:create_cache() " {{{
+function! s:create_cache() abort " {{{
     let s:desc_lookup = {}
     let s:cached_dicts = {}
 endfunction " }}}
-function! s:create_target_dict(key) " {{{
+function! s:create_target_dict(key) abort " {{{
     if has_key(s:desc_lookup, 'top')
         let toplevel = deepcopy({s:desc_lookup['top']})
         let tardict = s:toplevel ? toplevel : get(toplevel, a:key, {})
@@ -47,7 +47,7 @@ function! s:create_target_dict(key) " {{{
     endif
     return tardict
 endfunction " }}}
-function! s:merge(dict_t, dict_o) " {{{
+function! s:merge(dict_t, dict_o) abort " {{{
     let target = a:dict_t
     let other = a:dict_o
     for k in keys(target)
@@ -62,49 +62,49 @@ function! s:merge(dict_t, dict_o) " {{{
                     let target[k.'m'] = target[k]
                 endif
                 let target[k] = other[k]
-                if has_key(other, k."m") && type(other[k."m"]) == type({})
-                    call s:merge(target[k."m"], other[k."m"])
+                if has_key(other, k.'m') && type(other[k.'m']) == type({})
+                    call s:merge(target[k.'m'], other[k.'m'])
                 endif
             endif
         elseif type(target[k]) == type('') && has_key(other, k) && k !=? 'name'
             let target[k] = [other[k][0], target[k]]
         endif
     endfor
-    call extend(target, other, "keep")
+    call extend(target, other, 'keep')
 endfunction " }}}
 
-function! leaderGuide#populate_dictionary(key, dictname) " {{{
+function! leaderGuide#populate_dictionary(key, dictname) abort " {{{
     call s:start_parser(a:key, s:cached_dicts[a:key])
 endfunction " }}}
-function! leaderGuide#parse_mappings() " {{{
+function! leaderGuide#parse_mappings() abort " {{{
     for [k, v] in items(s:cached_dicts)
         call s:start_parser(k, v)
     endfor
 endfunction " }}}
 
 
-function! s:start_parser(key, dict) " {{{
-    let key = a:key ==? ' ' ? "<Space>" : a:key
-    let readmap = ""
+function! s:start_parser(key, dict) abort " {{{
+    let key = a:key ==? ' ' ? '<Space>' : a:key
+    let readmap = ''
     redir => readmap
     silent execute 'map '.key
     redir END
     let lines = split(readmap, "\n")
-    let visual = s:vis == "gv" ? 1 : 0
+    let visual = s:vis ==? 'gv' ? 1 : 0
 
     for line in lines
         let mapd = maparg(split(line[3:])[0], line[0], 0, 1)
-        if mapd.lhs =~ '<Plug>.*' || mapd.lhs =~ '<SNR>.*'
+        if mapd.lhs =~? '<Plug>.*' || mapd.lhs =~? '<SNR>.*'
             continue
         endif
         let mapd.display = s:format_displaystring(mapd.rhs)
-        let mapd.lhs = substitute(mapd.lhs, key, "", "")
-        let mapd.lhs = substitute(mapd.lhs, "<Space>", " ", "g")
-        let mapd.lhs = substitute(mapd.lhs, "<Tab>", "<C-I>", "g")
-        let mapd.rhs = substitute(mapd.rhs, "<SID>", "<SNR>".mapd['sid']."_", "g")
-        if mapd.lhs != '' && mapd.display !~# 'LeaderGuide.*'
-            if (visual && match(mapd.mode, "[vx ]") >= 0) ||
-                        \ (!visual && match(mapd.mode, "[vx]") == -1)
+        let mapd.lhs = substitute(mapd.lhs, key, '', '')
+        let mapd.lhs = substitute(mapd.lhs, '<Space>', ' ', 'g')
+        let mapd.lhs = substitute(mapd.lhs, '<Tab>', '<C-I>', 'g')
+        let mapd.rhs = substitute(mapd.rhs, '<SID>', '<SNR>'.mapd['sid'].'_', 'g')
+        if mapd.lhs !=# '' && mapd.display !~# 'LeaderGuide.*'
+            if (visual && match(mapd.mode, '[vx ]') >= 0) ||
+                        \ (!visual && match(mapd.mode, '[vx]') == -1)
             let mapd.lhs = s:string_to_keys(mapd.lhs)
             call s:add_map_to_dict(mapd, 0, a:dict)
             endif
@@ -112,7 +112,7 @@ function! s:start_parser(key, dict) " {{{
     endfor
 endfunction " }}}
 
-function! s:add_map_to_dict(map, level, dict) " {{{
+function! s:add_map_to_dict(map, level, dict) abort " {{{
     if len(a:map.lhs) > a:level+1
         let curkey = a:map.lhs[a:level]
         let nlevel = a:level+1
@@ -128,7 +128,7 @@ function! s:add_map_to_dict(map, level, dict) " {{{
             endif
         elseif type(a:dict[curkey]) == type([]) && g:leaderGuide_flatten == 0
             let cmd = s:escape_mappings(a:map)
-            let curkey = curkey."m"
+            let curkey = curkey.'m'
             if !has_key(a:dict, curkey)
                 let a:dict[curkey] = { 'name' : g:leaderGuide_default_group_name }
             endif
@@ -151,7 +151,7 @@ function! s:add_map_to_dict(map, level, dict) " {{{
         endif
     endif
 endfunction " }}}
-function! s:format_displaystring(map) " {{{
+function! s:format_displaystring(map) abort " {{{
     let g:leaderGuide#displayname = a:map
     for Fun in g:leaderGuide_displayfunc
         call Fun()
@@ -160,7 +160,7 @@ function! s:format_displaystring(map) " {{{
     unlet g:leaderGuide#displayname
     return display
 endfunction " }}}
-function! s:flattenmap(dict, str) " {{{
+function! s:flattenmap(dict, str) abort " {{{
     let ret = {}
     for kv in keys(a:dict)
         if type(a:dict[kv]) == type([])
@@ -176,8 +176,8 @@ function! s:flattenmap(dict, str) " {{{
 endfunction " }}}
 
 
-function! s:escape_mappings(mapping) " {{{
-    let feedkeyargs = a:mapping.noremap ? "nt" : "mt"
+function! s:escape_mappings(mapping) abort " {{{
+    let feedkeyargs = a:mapping.noremap ? 'nt' : 'mt'
     let rstring = substitute(a:mapping.rhs, '\', '\\\\', 'g')
     let rstring = substitute(rstring, '<\([^<>]*\)>', '\\<\1>', 'g')
     let rstring = substitute(rstring, '"', '\\"', 'g')
@@ -189,7 +189,7 @@ function! s:escape_mappings(mapping) " {{{
     endif
     return rstring
 endfunction " }}}
-function! s:string_to_keys(input) " {{{
+function! s:string_to_keys(input) abort " {{{
     " Avoid special case: <>
     if match(a:input, '<.\+>') != -1
         let retlist = []
@@ -213,11 +213,11 @@ function! s:string_to_keys(input) " {{{
         return split(a:input, '\zs')
     endif
 endfunction " }}}
-function! s:escape_keys(inp) " {{{
-    let ret = substitute(a:inp, "<", "<lt>", "")
-    return substitute(ret, "|", "<Bar>", "")
+function! s:escape_keys(inp) abort " {{{
+    let ret = substitute(a:inp, '<', '<lt>', '')
+    return substitute(ret, '|', '<Bar>', '')
 endfunction " }}}
-function! s:show_displayname(inp) " {{{
+function! s:show_displayname(inp) abort " {{{
     if has_key(s:displaynames, toupper(a:inp))
         return s:displaynames[toupper(a:inp)]
     else
@@ -228,10 +228,9 @@ endfunction " }}}
 let s:displaynames = {'<C-I>': 'TAB', '<BS>': 'BS', '<C-H>': 'BS', ' ': 'SPC'}
 " 1}}} "
 
-
-function! s:calc_layout() " {{{
+function! s:calc_layout() abort " {{{
     let ret = {}
-    let smap = filter(copy(s:lmap), '(v:key !=# "name") && !(type(v:val) == type([]) && v:val[1] == "leader_ignore")')
+    let smap = filter(copy(s:lmap), '(v:key !=# "name") && !(type(v:val) == type([]) && v:val[1] ==# "leader_ignore")')
     let ret.n_items = len(smap)
     let length = values(map(smap, 
                 \ 'strdisplaywidth("[".v:key."]".'.
@@ -252,7 +251,7 @@ function! s:calc_layout() " {{{
     endif
     return ret
 endfunction " }}}
-function! s:create_string(layout) " {{{
+function! s:create_string(layout) abort " {{{
     let l = a:layout
     let l.capacity = l.n_rows * l.n_cols
     let overcap = l.capacity - l.n_items
@@ -267,10 +266,10 @@ function! s:create_string(layout) " {{{
     let smap = sort(filter(keys(s:lmap), 'v:val !=# "name"'),'1')
     for k in smap
         if k ==? '<BS>' | let bs = 1 | endif
-        silent execute "cnoremap <nowait> <buffer> ".substitute(k, "|", "<Bar>", ""). " " . s:escape_keys(k) ."<CR>"
+        silent execute 'cnoremap <nowait> <buffer> '.substitute(k, '|', '<Bar>', ''). ' ' . s:escape_keys(k) .'<CR>'
         let desc = type(s:lmap[k]) == type({}) ? s:lmap[k].name : s:lmap[k][1]
         if desc ==? 'leader_ignore' | continue | endif
-        let displaystring = "[".s:show_displayname(k)."] ".(type(s:lmap[k]) == type({}) ? "+" : "").desc
+        let displaystring = '['.s:show_displayname(k).'] '.(type(s:lmap[k]) == type({}) ? '+' : '').desc
         let crow = get(rows, row, [])
         if empty(crow)
             call add(rows, crow)
@@ -323,9 +322,9 @@ function! s:create_string(layout) " {{{
 endfunction " }}}
 
 
-function! s:trigger_before_open() " {{{
+function! s:trigger_before_open() abort " {{{
     let trigger_name = 'before_open'
-    if !exists("s:triggers") || !has_key(s:triggers, trigger_name)
+    if !exists('s:triggers') || !has_key(s:triggers, trigger_name)
         return
     endif
 
@@ -335,7 +334,7 @@ function! s:trigger_before_open() " {{{
                 \ 'display': s:lmap, 
                 \ 'level': s:current_level, 
                 \ 'register': s:reg,
-                \ 'visual': s:vis == '',
+                \ 'visual': s:vis ==# '',
                 \ 'count': s:count,
                 \ 'winv': s:winv,
                 \ 'winnr': s:winnr,
@@ -346,7 +345,7 @@ function! s:trigger_before_open() " {{{
     call Fun()
 endfunction " }}}
 
-function! s:start_buffer() " {{{
+function! s:start_buffer() abort " {{{
     let s:winv = winsaveview()
     let s:winnr = winnr()
     let s:winres = winrestcmd()
@@ -372,7 +371,7 @@ function! s:start_buffer() " {{{
     setlocal nomodifiable
     call s:wait_for_input()
 endfunction " }}}
-function! s:handle_input(input) " {{{
+function! s:handle_input(input) abort " {{{
     call s:winclose()
     if type(a:input) ==? type({})
         let s:current_level += 1
@@ -383,7 +382,7 @@ function! s:handle_input(input) " {{{
         if type(a:input) !=? type([])
             let last = strpart(s:last_inp[-1], strchars(s:last_inp[-1]) - 1)
             if s:last_inp[0] !=? last
-                execute s:escape_mappings({'rhs': join(s:last_inp, ""), 'noremap': 0})
+                execute s:escape_mappings({'rhs': join(s:last_inp, ''), 'noremap': 0})
             endif
             return
         endif
@@ -395,7 +394,7 @@ function! s:handle_input(input) " {{{
         endtry
     endif
 endfunction " }}}
-function! s:wait_for_input() " {{{
+function! s:wait_for_input() abort " {{{
     redraw
     let curr_inp = input('')
     if curr_inp ==? ''
@@ -420,7 +419,7 @@ function! s:wait_for_input() " {{{
         call s:handle_input(fsel)
     endif
 endfunction " }}}
-function! s:winopen() " {{{
+function! s:winopen() abort " {{{
     if !exists('s:bufnr')
         let s:bufnr = -1
     endif
@@ -439,7 +438,10 @@ function! s:winopen() " {{{
         let splitcmd = g:leaderGuide_vertical ? ' 1vnew' : ' 1new'
         noautocmd execute pos.splitcmd
         let s:bufnr = bufnr('%')
-        autocmd WinLeave <buffer> call s:winclose()
+        augroup leaderguide_winopen_autoclose_group
+            autocmd!
+            autocmd WinLeave <buffer> call s:winclose()
+        augroup END
     endif
     let s:gwin = winnr()
     setlocal filetype=leaderGuide
@@ -447,19 +449,22 @@ function! s:winopen() " {{{
     setlocal nobuflisted buftype=nofile bufhidden=unload noswapfile
     setlocal nocursorline nocursorcolumn colorcolumn=
     setlocal winfixwidth winfixheight
-    call setwinvar(winnr(), '&statusline', '%{s:statusline()}')
+    call setwinvar(winnr(), '&statusline', '%{s:statusline_keys()}%=%{s:statusline_name()}')
 endfunction " }}}
-function! s:statusline() abort
+function! s:statusline_keys() abort
     let ret = ''
     for key in s:last_inp
         let ret .= s:key_for_status(key) .' '
     endfor
-    return empty(ret) ? 'Leader Guide' : ret
+    return (empty(ret) ? 'Leader Guide' : ret)
 endfunction
 function! s:key_for_status(key) abort
     return substitute(a:key, ' ', 'SPC', '')
 endfunction
-function! s:winclose() " {{{
+function! s:statusline_name() abort
+    return ''
+endfunction
+function! s:winclose() abort " {{{
     noautocmd execute s:gwin.'wincmd w'
     if s:gwin == winnr()
         close
@@ -469,18 +474,18 @@ function! s:winclose() " {{{
         call winrestview(s:winv)
     endif
 endfunction " }}}
-function! s:page_down() " {{{
-    call feedkeys("\<c-c>", "n")
-    call feedkeys("\<c-f>", "x")
+function! s:page_down() abort " {{{
+    call feedkeys("\<c-c>", 'n')
+    call feedkeys("\<c-f>", 'x')
     call s:wait_for_input()
 endfunction " }}}
-function! s:page_up() " {{{
-    call feedkeys("\<c-c>", "n")
-    call feedkeys("\<c-b>", "x")
+function! s:page_up() abort " {{{
+    call feedkeys("\<c-c>", 'n')
+    call feedkeys("\<c-b>", 'x')
     call s:wait_for_input()
 endfunction " }}}
 
-function! s:handle_submode_mapping(cmd) " {{{
+function! s:handle_submode_mapping(cmd) abort " {{{
     if a:cmd ==? '<LGCMD>page_down'
         call s:page_down()
     elseif a:cmd ==? '<LGCMD>page_up'
@@ -489,11 +494,11 @@ function! s:handle_submode_mapping(cmd) " {{{
         call s:winclose()
     endif
 endfunction " }}}
-function! s:submode_mappings() " {{{
-    let submodestring = ""
+function! s:submode_mappings() abort " {{{
+    let submodestring = ''
     let maplist = []
     for key in items(g:leaderGuide_submode_mappings)
-        let map = maparg(key[0], "c", 0, 1)
+        let map = maparg(key[0], 'c', 0, 1)
         if !empty(map)
             call add(maplist, map)
         endif
@@ -506,7 +511,7 @@ function! s:submode_mappings() " {{{
     endfor
     silent call s:handle_submode_mapping(inp)
 endfunction " }}}
-function! s:mapmaparg(maparg) " {{{
+function! s:mapmaparg(maparg) abort " {{{
     let noremap = a:maparg.noremap ? 'noremap' : 'map'
     let buffer = a:maparg.buffer ? '<buffer> ' : ''
     let silent = a:maparg.silent ? '<silent> ' : ''
@@ -515,7 +520,7 @@ function! s:mapmaparg(maparg) " {{{
     execute st
 endfunction " }}}
 
-function! s:get_register() "{{{
+function! s:get_register() abort " {{{
     if match(&clipboard, 'unnamedplus') >= 0
         let clip = '+'
     elseif match(&clipboard, 'unnamed') >= 0
@@ -525,7 +530,7 @@ function! s:get_register() "{{{
     endif
     return clip
 endfunction "}}}
-function! s:init_on_call(vis) " {{{
+function! s:init_on_call(vis) abort " {{{
     let s:vis = a:vis ? 'gv' : ''
     let s:count = v:count != 0 ? v:count : ''
     let s:current_level = 1
@@ -537,7 +542,7 @@ function! s:init_on_call(vis) " {{{
         let s:reg = v:register != s:get_register() ? '"'.v:register : ''
     endif
 endfunction " }}}
-function! leaderGuide#start_by_prefix(vis, key) " {{{
+function! leaderGuide#start_by_prefix(vis, key) abort " {{{
 
     call s:init_on_call(a:vis)
     call add(s:last_inp, a:key)
@@ -558,7 +563,7 @@ function! leaderGuide#start_by_prefix(vis, key) " {{{
 
     call s:start_buffer()
 endfunction " }}}
-function! leaderGuide#start(vis, dict) " {{{
+function! leaderGuide#start(vis, dict) abort " {{{
 
     call s:init_on_call(a:vis)
 
@@ -566,5 +571,5 @@ function! leaderGuide#start(vis, dict) " {{{
     call s:start_buffer()
 endfunction " }}}
 
-let &cpo = s:save_cpo
+let &cpoptions = s:save_cpo
 unlet s:save_cpo
