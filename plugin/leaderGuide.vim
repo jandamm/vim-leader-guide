@@ -56,11 +56,11 @@ if !leaderGuide#has_configuration()
 	call leaderGuide#register_prefix_descriptions('', 'g:leaderGuide_map')
 endif
 
-command -nargs=1 LeaderGuideD call leaderGuide#start('0', <args>)
-command -range -nargs=1 LeaderGuideVisualD call leaderGuide#start('1', <args>)
+command! -nargs=1 LeaderGuideD call leaderGuide#start('0', <args>)
+command! -range -nargs=1 LeaderGuideVisualD call leaderGuide#start('1', <args>)
 
-command -nargs=1 LeaderGuide call leaderGuide#start_by_prefix('0', <args>)
-command -range -nargs=1 LeaderGuideVisual call leaderGuide#start_by_prefix('1', <args>)
+command! -nargs=1 LeaderGuide call leaderGuide#start_by_prefix('0', <args>)
+command! -range -nargs=1 LeaderGuideVisual call leaderGuide#start_by_prefix('1', <args>)
 
 nnoremap <silent> <Plug>leaderguide-buffer :<C-U>call leaderGuide#start_by_prefix('0', '<buffer>')<CR>
 vnoremap <silent> <Plug>leaderguide-buffer :<C-U>call leaderGuide#start_by_prefix('1', '<buffer>')<CR>
