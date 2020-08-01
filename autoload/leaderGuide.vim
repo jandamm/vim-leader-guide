@@ -447,8 +447,18 @@ function! s:winopen() " {{{
     setlocal nobuflisted buftype=nofile bufhidden=unload noswapfile
     setlocal nocursorline nocursorcolumn colorcolumn=
     setlocal winfixwidth winfixheight
-    setlocal statusline=\ Leader\ Guide
+    call setwinvar(winnr(), '&statusline', '%{s:statusline()}')
 endfunction " }}}
+function! s:statusline() abort
+    let ret = ''
+    for key in s:last_inp
+        let ret .= s:key_for_status(key) .' '
+    endfor
+    return empty(ret) ? 'Leader Guide' : ret
+endfunction
+function! s:key_for_status(key) abort
+    return substitute(a:key, ' ', 'SPC', '')
+endfunction
 function! s:winclose() " {{{
     noautocmd execute s:gwin.'wincmd w'
     if s:gwin == winnr()
