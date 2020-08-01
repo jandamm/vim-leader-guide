@@ -312,7 +312,11 @@ function! s:create_string(layout) " {{{
     let output = join(r, "\n ")
     cnoremap <nowait> <buffer> <Space> <Space><CR>
     if !bs
-        cnoremap <nowait> <buffer> <BS> <LGCMD>back<CR>
+        if s:current_level == 1
+            cnoremap <nowait> <buffer> <BS> <ESC>
+        else
+            cnoremap <nowait> <buffer> <BS> <LGCMD>back<CR>
+        endif
     endif
     cnoremap <nowait> <buffer> <silent> <c-c> <LGCMD>submode<CR>
     return output
@@ -396,9 +400,18 @@ function! s:wait_for_input() " {{{
     let curr_inp = input('')
     if curr_inp ==? ''
         call s:winclose()
-    elseif match(curr_inp, '^<LGCMD>back') == 0
-        " TODO: Get a layer back
+    elseif match(curr_inp, '<LGCMD>back') != -1
         call s:winclose()
+        let s:current_level -= 1
+        call remove(s:last_inp, -1)
+        if !empty(s:last_inp)
+            let lmap = copy(s:cached_dicts)
+            for key in s:last_inp
+                let lmap = lmap[key]
+            endfor
+            let s:lmap = lmap
+            call s:start_buffer()
+        endif
     elseif match(curr_inp, '^<LGCMD>submode') == 0
         call s:submode_mappings()
     else
