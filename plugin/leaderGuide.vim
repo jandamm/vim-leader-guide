@@ -50,7 +50,9 @@ if !exists('g:leaderGuide_displayfunc')
 endif
 
 if !leaderGuide#has_configuration()
-	let g:leaderGuide_map = {}
+	if !exists('g:leaderGuide_map')
+		let g:leaderGuide_map = {}
+	endif
 	call leaderGuide#register_prefix_descriptions('', 'g:leaderGuide_map')
 endif
 
