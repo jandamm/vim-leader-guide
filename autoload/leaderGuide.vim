@@ -188,12 +188,15 @@ function! s:escape_mappings(mapping) abort " {{{
 	let rstring = substitute(a:mapping.rhs, '\', '\\\\', 'g')
 	let rstring = substitute(rstring, '<\([^<>]*\)>', '\\<\1>', 'g')
 	let rstring = substitute(rstring, '"', '\\"', 'g')
-	let [rstring, suc] = s:cmd_rename(rstring)
-	if suc
+	if a:mapping.expr
+		let rstring = 'eval("'.rstring.'")'
+	endif
+	let [rstring, cmd] = s:cmd_rename(rstring)
+	if cmd
 		" Don't escape <SNR> when in command mode
 		let rstring = substitute(rstring, '\V\\<SNR>', '<SNR>', '')
 	else
-		let rstring = 'call feedkeys("'.rstring.'", "'.feedkeyargs.'")'
+		let rstring = 'silent call feedkeys("'.rstring.'", "'.feedkeyargs.'")'
 	endif
 	return rstring
 endfunction " }}}
