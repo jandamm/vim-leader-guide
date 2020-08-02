@@ -197,7 +197,7 @@ function! s:escape_mappings(mapping) abort " {{{
 			" Don't escape <SNR> when in command mode
 			let rstring = substitute(rstring, '\V\\<SNR>', '<SNR>', '')
 		else
-		let rstring = printf(format, '"'.rstring.'"')
+			let rstring = printf(format, '"'.rstring.'"')
 		endif
 	endif
 	return rstring
@@ -238,7 +238,17 @@ function! s:show_displayname(inp) abort " {{{
 	end
 endfunction " }}}
 " displaynames {{{1 "
-let s:displaynames = {'<C-I>': 'TAB', '<BS>': 'BS', '<C-H>': 'BS', ' ': 'SPC'}
+let s:displaynames = {
+			\ '<C-I>': 'TAB',
+			\ '<CR>': 'CR',
+			\ '<BS>': 'BS',
+			\ '<C-H>': 'BS',
+			\ ' ': 'SPC',
+			\ '<F1>': 'F1', '<F2>': 'F2', '<F3>': 'F3', '<F4>': 'F4', '<F5>': 'F5',
+			\ '<F6>': 'F6', '<F7>': 'F7', '<F8>': 'F8', '<F9>': 'F9', '<F10>': 'F10',
+			\ '<F11>': 'F11', '<F12>': 'F12', '<F13>': 'F13', '<F14>': 'F14', '<F15>': 'F15',
+			\ '<F16>': 'F16', '<F17>': 'F17', '<F18>': 'F18', '<F19>': 'F19', '<F20>': 'F20'
+			\ }
 " 1}}} "
 
 function! s:calc_layout() abort " {{{
