@@ -189,7 +189,10 @@ function! s:escape_mappings(mapping) abort " {{{
 	let rstring = substitute(rstring, '<\([^<>]*\)>', '\\<\1>', 'g')
 	let rstring = substitute(rstring, '"', '\\"', 'g')
 	let [rstring, suc] = s:cmd_rename(rstring)
-	if !suc
+	if suc
+		" Don't escape <SNR> when in command mode
+		let rstring = substitute(rstring, '\V\\<SNR>', '<SNR>', '')
+	else
 		let rstring = 'call feedkeys("'.rstring.'", "'.feedkeyargs.'")'
 	endif
 	return rstring
