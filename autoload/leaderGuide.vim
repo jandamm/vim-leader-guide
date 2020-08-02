@@ -185,18 +185,20 @@ function! s:cmd_rename(string) abort
 endfunction
 function! s:escape_mappings(mapping) abort " {{{
 	let feedkeyargs = a:mapping.noremap ? 'nt' : 'mt'
+	let format = 'silent call feedkeys(%s), "'.feedkeyargs.'")'
 	let rstring = substitute(a:mapping.rhs, '\', '\\\\', 'g')
 	let rstring = substitute(rstring, '<\([^<>]*\)>', '\\<\1>', 'g')
 	let rstring = substitute(rstring, '"', '\\"', 'g')
 	if a:mapping.expr
-		let rstring = 'eval("'.rstring.'")'
-	endif
-	let [rstring, cmd] = s:cmd_rename(rstring)
-	if cmd
-		" Don't escape <SNR> when in command mode
-		let rstring = substitute(rstring, '\V\\<SNR>', '<SNR>', '')
+		let rstring = printf(format, 'eval("'.rstring.'")')
 	else
-		let rstring = 'silent call feedkeys("'.rstring.'", "'.feedkeyargs.'")'
+		let [rstring, cmd] = s:cmd_rename(rstring)
+		if cmd
+			" Don't escape <SNR> when in command mode
+			let rstring = substitute(rstring, '\V\\<SNR>', '<SNR>', '')
+		else
+		let rstring = printf(format, '"'.rstring.'"')
+		endif
 	endif
 	return rstring
 endfunction " }}}
