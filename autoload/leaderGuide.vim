@@ -426,6 +426,7 @@ function! s:wait_for_input() abort " {{{
 		call s:winclose()
 		let s:current_level -= 1
 		call remove(s:last_inp, -1)
+		call remove(s:last_name, -1)
 		if empty(s:last_inp) | return | endif
 		let s:lmap = s:get_cur_map()
 		call s:start_buffer()
@@ -434,6 +435,7 @@ function! s:wait_for_input() abort " {{{
 	else
 		call add(s:last_inp, curr_inp)
 		let fsel = get(s:lmap, curr_inp[-1:])
+		call add(s:last_name, get(fsel, 'name', ''))
 		call s:handle_input(fsel)
 	endif
 endfunction " }}}
@@ -474,18 +476,25 @@ function! s:winopen() abort " {{{
 	setlocal nobuflisted buftype=nofile bufhidden=unload noswapfile
 	setlocal nocursorline nocursorcolumn colorcolumn=
 	setlocal winfixwidth winfixheight
-	call setwinvar(winnr(), '&statusline', '%{s:statusline_keys()}%=%{s:statusline_name()}%<')
+	call setwinvar(winnr(), '&statusline', '%!s:statusline_keys()')
 endfunction " }}}
 function! s:statusline_keys() abort
 	let ret = ''
 	for key in s:last_inp
-		let ret .= s:show_displayname(key) .' '
+		if key ==? '<buffer>' | continue | endif
+		let ret .= s:show_displayname(key).' '
 	endfor
-	return empty(ret) ? 'Leader Guide' : ret
-endfunction
-function! s:statusline_name() abort
-	let name = get(s:get_cur_map(), 'name', '')
-	return empty(name) ? '' : '+'.name
+	if !empty(ret)
+		let ret = '%#LeaderGuideKeys#'.ret.'%*%='
+	endif
+	let name = s:last_name[-1]
+	if !empty(name)
+		let group_prefix = empty(ret) ? '' : '+'
+		let ret .= '%#LeaderGuideMenu#'.group_prefix.name.'%*'
+	elseif empty(ret)
+		let ret = 'Leader Guide'
+	endif
+	return ret
 endfunction
 function! s:winclose() abort " {{{
 	noautocmd execute s:gwin.'wincmd w'
@@ -558,6 +567,7 @@ function! s:init_on_call(vis) abort " {{{
 	let s:count = v:count != 0 ? v:count : ''
 	let s:current_level = 1
 	let s:last_inp = []
+	let s:last_name = []
 
 	if has('nvim') && !exists('s:reg')
 		let s:reg = ''
@@ -583,6 +593,8 @@ function! leaderGuide#start_by_prefix(vis, key) abort " {{{
 		let rundict = s:cached_dicts[a:key]
 	endif
 	let s:lmap = rundict
+
+	call add(s:last_name, get(rundict, 'name', ''))
 
 	call s:start_buffer()
 endfunction " }}}
