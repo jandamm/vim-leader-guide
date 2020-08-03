@@ -68,6 +68,8 @@ function! s:merge(dict_t, dict_o) abort " {{{
 			endif
 		elseif type(target[k]) == type('') && has_key(other, k) && k !=? 'name'
 			let target[k] = [other[k][0], target[k]]
+		elseif type(target[k]) == type('') && !has_key(other, k) && k !=? 'name'
+			unlet target[k]
 		endif
 	endfor
 	call extend(target, other, 'keep')
