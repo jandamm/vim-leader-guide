@@ -196,6 +196,7 @@ function! s:escape_mappings(mapping) abort " {{{
 		if cmd
 			" Don't escape <SNR> when in command mode
 			let rstring = substitute(rstring, '\V\\<SNR>', '<SNR>', '')
+			let rstring = substitute(rstring, '^\V\\<C-u>', '', '')
 		else
 			let rstring = printf(format, '"'.rstring.'"')
 		endif
