@@ -434,7 +434,7 @@ function! s:wait_for_input() abort " {{{
 		call s:submode_mappings()
 	else
 		call add(s:last_inp, curr_inp)
-		let fsel = get(s:lmap, curr_inp[-1:])
+		let fsel = get(s:lmap, curr_inp)
 		call add(s:last_name, get(fsel, 'name', ''))
 		call s:handle_input(fsel)
 	endif
