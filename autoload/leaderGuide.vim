@@ -411,7 +411,7 @@ function! s:handle_input(input) abort " {{{
 		endif
 		redraw
 		try
-			silent execute a:input[0]
+			unsilent execute a:input[0]
 		catch
 			unsilent echom v:exception
 		endtry
