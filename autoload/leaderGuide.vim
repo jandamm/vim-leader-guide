@@ -154,7 +154,7 @@ function! s:add_map_to_dict(map, level, dict) abort " {{{
 	endif
 endfunction " }}}
 function! s:format_displaystring(map) abort " {{{
-	let g:leaderGuide#displayname = s:cmd_rename(a:map)[0]
+	let g:leaderGuide#displayname = s:cmd_rename(a:map, 0)[0]
 	for Fun in g:leaderGuide_displayfunc
 		call Fun()
 	endfor
@@ -177,8 +177,9 @@ function! s:flattenmap(dict, str) abort " {{{
 	return ret
 endfunction " }}}
 
-function! s:cmd_rename(string) abort
-	let cmd_reg = '\v^%(:|\V\\<CMD>\v)(.*)\V\\<CR>\v$'
+function! s:cmd_rename(string, escaped) abort
+	let escape = a:escaped ? '\\' : ''
+	let cmd_reg = '\v^%(:|\V'.escape.'<CMD>\v)(.*)\V'.escape.'<CR>\v$'
 	if a:string =~? cmd_reg
 		return [substitute(a:string, cmd_reg, '\1', ''), 1]
 	else
@@ -194,7 +195,7 @@ function! s:escape_mappings(mapping) abort " {{{
 	if a:mapping.expr
 		let rstring = printf(format, 'eval("'.rstring.'")')
 	else
-		let [rstring, cmd] = s:cmd_rename(rstring)
+		let [rstring, cmd] = s:cmd_rename(rstring, 1)
 		if cmd
 			" Don't escape <SNR> when in command mode
 			let rstring = substitute(rstring, '\V\\<SNR>', '<SNR>', '')
@@ -273,7 +274,6 @@ function! s:calc_layout() abort " {{{
 		let ret.col_width = winwidth(0) / ret.n_cols
 		let ret.n_rows = ret.n_items / ret.n_cols + (fmod(ret.n_items,ret.n_cols) > 0 ? 1 : 0)
 		let ret.win_dim = ret.n_rows
-		"echom string(ret)
 	endif
 	return ret
 endfunction " }}}
