@@ -446,8 +446,8 @@ function! s:wait_for_input() abort " {{{
 	endif
 endfunction " }}}
 function! s:get_cur_map() abort
-	let lmap = copy(s:cached_dicts)
-	for key in s:last_inp
+	let lmap = s:mmap
+	for key in s:last_inp[1:]
 		let lmap = lmap[key]
 	endfor
 	return lmap
@@ -595,6 +595,7 @@ function! leaderGuide#start_by_prefix(vis, key) abort " {{{
 		let rundict = s:cached_dicts[a:key]
 	endif
 	let s:lmap = rundict
+	let s:mmap = rundict
 
 	call add(s:last_name, get(rundict, 'name', ''))
 
@@ -605,6 +606,7 @@ function! leaderGuide#start(vis, dict) abort " {{{
 	call s:init_on_call(a:vis)
 
 	let s:lmap = a:dict
+	let s:mmap = a:dict
 	call s:start_buffer()
 endfunction " }}}
 
