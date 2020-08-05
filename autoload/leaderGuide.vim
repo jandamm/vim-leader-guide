@@ -482,14 +482,10 @@ function! s:winopen() abort " {{{
 	setlocal nobuflisted buftype=nofile bufhidden=unload noswapfile
 	setlocal nocursorline nocursorcolumn colorcolumn=
 	setlocal winfixwidth winfixheight
-	call setwinvar(winnr(), '&statusline', '%!s:statusline_keys()')
+	call setwinvar(winnr(), '&statusline', '%!s:statusline()')
 endfunction " }}}
-function! s:statusline_keys() abort
-	let ret = ''
-	for key in s:last_inp
-		if key ==? '<buffer>' | continue | endif
-		let ret .= s:show_displayname(key).' '
-	endfor
+function! s:statusline() abort
+	let ret = join(map(filter(copy(s:last_inp), 'v:val !=? "<buffer>"'), { _, key -> s:show_displayname(key) }))
 	if !empty(ret)
 		let ret = '%#LeaderGuideKeys#'.ret.'%*%='
 	endif
