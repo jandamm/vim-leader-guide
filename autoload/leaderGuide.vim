@@ -594,21 +594,21 @@ function! leaderGuide#start_by_prefix(vis, key) abort " {{{
 	else
 		let rundict = s:cached_dicts[a:key]
 	endif
-	let s:lmap = rundict
-	let s:mmap = rundict
 
-	call add(s:last_name, get(rundict, 'name', ''))
-
-	call s:start_buffer()
+	call s:start_with_dict(rundict)
 endfunction " }}}
 function! leaderGuide#start(vis, dict) abort " {{{
-
 	call s:init_on_call(a:vis)
-
+	call s:start_with_dict(a:dict)
+endfunction " }}}
+function! s:start_with_dict(dict) abort
 	let s:lmap = a:dict
 	let s:mmap = a:dict
+
+	call add(s:last_name, get(a:dict, 'name', ''))
+
 	call s:start_buffer()
-endfunction " }}}
+endfunction
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
