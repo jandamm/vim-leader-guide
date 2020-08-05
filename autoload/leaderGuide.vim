@@ -238,20 +238,26 @@ function! s:show_displayname(inp) abort " {{{
 	if has_key(s:displaynames, toupper(a:inp))
 		return s:displaynames[toupper(a:inp)]
 	else
-		return a:inp
+		let output = a:inp
+		for key in keys(s:displaynames)
+			let output = substitute(output, '\c\V'.key, '_'.s:displaynames[key], '')
+		endfor
+		return output
 	end
 endfunction " }}}
 " displaynames {{{1 "
 let s:displaynames = {
-			\ '<C-I>': 'TAB',
-			\ '<CR>': 'CR',
-			\ '<BS>': 'BS',
-			\ '<C-H>': 'BS',
-			\ ' ': 'SPC',
-			\ '<F1>': 'F1', '<F2>': 'F2', '<F3>': 'F3', '<F4>': 'F4', '<F5>': 'F5',
-			\ '<F6>': 'F6', '<F7>': 'F7', '<F8>': 'F8', '<F9>': 'F9', '<F10>': 'F10',
-			\ '<F11>': 'F11', '<F12>': 'F12', '<F13>': 'F13', '<F14>': 'F14', '<F15>': 'F15',
-			\ '<F16>': 'F16', '<F17>': 'F17', '<F18>': 'F18', '<F19>': 'F19', '<F20>': 'F20'
+			\ '<C-I>' : 'TAB',
+			\ '<TAB>' : 'TAB',
+			\ '<CR>'  : 'CR',
+			\ '<BS>'  : 'BS',
+			\ '<C-H>' : 'BS',
+			\ '<ESC>' : 'ESC',
+			\ ' '     : 'SPC',
+			\ '<F1>'  : 'F1', '<F2>'   : 'F2', '<F3>'   : 'F3', '<F4>'   : 'F4', '<F5>'   : 'F5',
+			\ '<F6>'  : 'F6', '<F7>'   : 'F7', '<F8>'   : 'F8', '<F9>'   : 'F9', '<F10>'  : 'F10',
+			\ '<F11>' : 'F11', '<F12>' : 'F12', '<F13>' : 'F13', '<F14>' : 'F14', '<F15>' : 'F15',
+			\ '<F16>' : 'F16', '<F17>' : 'F17', '<F18>' : 'F18', '<F19>' : 'F19', '<F20>' : 'F20',
 			\ }
 " 1}}} "
 
