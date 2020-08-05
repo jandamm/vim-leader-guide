@@ -18,3 +18,6 @@ hi def link LeaderGuideMenu Title
 hi def link LeaderGuideDesc Identifier
 hi def link LeaderGuideKeys Type
 hi def link LeaderGuideBrackets Delimiter
+
+hi def link LeaderGuideMenuStatusline LeaderGuideMenu
+hi def link LeaderGuideKeysStatusline LeaderGuideKeys

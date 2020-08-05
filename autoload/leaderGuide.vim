@@ -487,12 +487,12 @@ endfunction " }}}
 function! s:statusline() abort
 	let ret = join(map(filter(copy(s:last_inp), 'v:val !=? "<buffer>"'), { _, key -> s:show_displayname(key) }))
 	if !empty(ret)
-		let ret = '%#LeaderGuideKeys#'.ret.'%*%='
+		let ret = '%#LeaderGuideKeysStatusline#'.ret.'%*%='
 	endif
 	let name = s:last_name[-1]
 	if !empty(name)
 		let group_prefix = empty(ret) ? '' : '+'
-		let ret .= '%#LeaderGuideMenu#'.group_prefix.name.'%*'
+		let ret .= '%#LeaderGuideMenuStatusline#'.group_prefix.name.'%*'
 	elseif empty(ret)
 		let ret = 'Leader Guide'
 	endif
