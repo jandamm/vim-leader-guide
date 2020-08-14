@@ -441,7 +441,9 @@ function! s:wait_for_input() abort " {{{
 	else
 		call add(s:last_inp, curr_inp)
 		let fsel = get(s:lmap, curr_inp)
-		call add(s:last_name, get(fsel, 'name', ''))
+		if type(fsel) == type({})
+			call add(s:last_name, get(fsel, 'name', ''))
+		endif
 		call s:handle_input(fsel)
 	endif
 endfunction " }}}
